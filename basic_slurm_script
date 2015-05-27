@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH --time = 48:00:00
+#SBATCH --qos = long
+#SBATCH --cpus-per-task=1
+#
+cd /nfs/nhome/live/gbohner/Dropbox/Gatsby/Random/Mijung_NPLDS/Code
+/opt/matlab-R2013b/bin/matlab -nodisplay -nosplash -singleCompThread -r "runAlexsdata_fitting"
+echo $SLURM_JOB_ID
