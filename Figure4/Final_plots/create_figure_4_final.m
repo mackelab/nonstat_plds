@@ -1,11 +1,13 @@
 %% Global settings
-code_dir = '/nfs/nhome/live/gbohner/Dropbox/Gatsby/Random/Mijung_NPLDS/Code';
-data_file = '/nfs/data3/gergo/Mijung/Figure4/Input_data/alexdata_session2_org0_bin50.mat';
-NSFR_fit_file = '/nfs/data3/gergo/Mijung/Figure4/Example_run/k7_run5/final_NSFR_data.mat';
-NSFR_sim_file = '/nfs/data3/gergo/Mijung/Figure4/Example_run/k7_run5/final_NSFR_data_predfr_all.mat';
-PLDS_sim_file = '/nfs/data3/gergo/Mijung/Figure4/Example_run/k7_run5/final_PLDS_data_predfr_all.mat';
+matlab_default_figure; %Changes the default figure appearance
 
-cd(code_dir);
+% code_dir = '/nfs/nhome/live/gbohner/Dropbox/Gatsby/Random/Mijung_NPLDS/Code';
+% data_file = '/nfs/data3/gergo/Mijung/Figure4/Input_data/alexdata_session2_org0_bin50.mat';
+% NSFR_fit_file = '/nfs/data3/gergo/Mijung/Figure4/Example_run/k7_run5/final_NSFR_data.mat';
+% NSFR_sim_file = '/nfs/data3/gergo/Mijung/Figure4/Example_run/k7_run5/final_NSFR_data_predfr_all.mat';
+% PLDS_sim_file = '/nfs/data3/gergo/Mijung/Figure4/Example_run/k7_run5/final_PLDS_data_predfr_all.mat';
+% 
+% cd(code_dir);
 
 DATA_COLOR = [0 0 0];
 NSFR_COLOR = [1 0 0];
@@ -205,7 +207,7 @@ fig7 = figure(7);
 errorbar((1:9)-.05, mean(NSFR_error,2)/(10*length(neurons_to_include))*20, std(NSFR_error,0,2)/(10*length(neurons_to_include))*20, 'rx'); %/(10*length(neurons_to_include)) due to 10 left out trials and certain number of chosen neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
 hold on; errorbar((1:9)+.05, mean(PLDS_error,2)/(10*length(neurons_to_include))*20, std(PLDS_error,0,2)/(10*length(neurons_to_include))*20, 'bx');
 xlabel('k')
-title('RMSE in firing rates of most non-stationary 5 neurons')
+title('RMSE in firing rates of most stationary 5 neurons')
 set(gca,'XTick',1:9);
 ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
 legend('N-PLDS','PLDS')
