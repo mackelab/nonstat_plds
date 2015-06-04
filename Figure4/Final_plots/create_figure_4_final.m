@@ -15,45 +15,11 @@ PLDS_COLOR = [.4 .4 .4];
 
 %% Panel A - Example data, plus NSFR and PLDS fits
 
-% % Extract the data (commented out)
-% load(data_file, 'resps');
-% resps = double(resps);
-% resps = squeeze(mean(resps,2));
-% pop_mean = mean(mean(mean(resps)))*20; %Average spike / bin * 20 (due to 50 ms bins) = average firing rate;
-% resps_orig = resps;
-% % 
-% %Do smoothing then least square to find non-stationarity
-% for i1 = 1:size(resps,1)
-%   resps(i1,:) = smooth(resps(i1,:),'moving',15);
-% end
-% resps_smooth = resps;
-% resps = bsxfun(@minus, resps, mean(resps,2));
-% resps = sqrt(mean(resps.^2,2));
-% [~, ix] = sort(resps,'descend');
-% 
-% % %Do linear regression to find non-stationarity
-% % lincoeffs = zeros(size(resps,1),1);
-% % for i1 = 1:size(resps,1)
-% %   p = polyfit(1:100,resps(i1,:),1);
-% %   lincoeffs(i1) = p(1);
-% % end
-% % [~,ix] = sort(abs(lincoeffs),'descend');
-%  
-% %Choose which neurons to show
-% neurons_to_show = ix(1:3);
-% 
-% %Load simulated data
-% load(NSFR_sim_file, 'fr_mean_pred_all');
-% fr_mean_pred_NSFR = median(fr_mean_pred_all,3);
-% load(PLDS_sim_file, 'fr_mean_pred_all');
-% fr_mean_pred_PLDS = median(fr_mean_pred_all,3);
-% 
-% save('Figure4/Final_plots/Panel_A','resps_orig','fr_mean_pred_NSFR','fr_mean_pred_PLDS','neurons_to_show')
-
 %Make the figure;
 load('Figure4/Final_plots/Panel_A');
 
-fig1 = figure(1); clf
+neurons_to_show = neuron_stationarity_sort(5:-1:1);
+fig1 = figure(11); clf
 hold on;
 for i1 = 1:length(neurons_to_show)
   plot(resps_orig(neurons_to_show(i1),:)'*20+(i1-1)*20, 'Color', DATA_COLOR);
@@ -62,11 +28,13 @@ end
 
 for i1 = 1:length(neurons_to_show)
   plot(fr_mean_pred_NSFR(neurons_to_show(i1),:)'*20+(i1-1)*20,'Color', NSFR_COLOR);
+  scatter(params.ind_test, fr_mean_pred_NSFR(neurons_to_show(i1),params.ind_test)'*20+(i1-1)*20, 150,  NSFR_COLOR, 'x', 'LineWidth',2);
 end
  
 
 for i1 = 1:length(neurons_to_show)
   plot(fr_mean_pred_PLDS(neurons_to_show(i1),:)'*20+(i1-1)*20,'Color',PLDS_COLOR);
+  scatter(params.ind_test, fr_mean_pred_PLDS(neurons_to_show(i1),params.ind_test)'*20+(i1-1)*20, 150,  PLDS_COLOR, 'x', 'LineWidth',2);
 end
 
 set(gca,'XTick',0:25:100);
@@ -74,42 +42,103 @@ ylim([0,20*length(neurons_to_show)]);
 set(gca,'YTick',0:5:(20*length(neurons_to_show)-1));
 set(gca,'YTickLabel',repmat(0:5:15,1,length(neurons_to_show)));
 xlabel('Trial')
-ylabel('Firing rate (Hz)');
+ylabel('Mean firing rate (Hz)');
 
 set(fig1,'Units','centimeters');
-set(fig1,'Position',[1,1,12,24]);
+set(fig1,'Position',[1,1,11,14]);
 
-print('-depsc2', 'Figure4/Final_plots/Panel_A.eps');
+set(fig1,'PaperPositionMode','auto')
+% print(fig1, '-depsc2', 'Figure4/Final_plots/Panel_A1.eps');
+export_fig('Figure4/Final_plots/Panel_A1.eps', '-native');
 
-%% Panel B - Example modulation over trials
+neurons_to_show = neuron_stationarity_sort(58:62);
+const_fr_step = 2;
+fig2 = figure(12); clf
+hold on;
+for i1 = 1:length(neurons_to_show)
+  plot(resps_orig(neurons_to_show(i1),:)'*20+(i1-1)*const_fr_step, 'Color', DATA_COLOR);
+  line([0,100],[(i1-1)*const_fr_step,(i1-1)*const_fr_step],'Color','k');
+end
 
-% % Extract the data (commented out)
-% %See h-predictions (they're on the line for h);
-% load(NSFR_fit_file, 'datastruct');
-% load(NSFR_sim_file, 'hall');
-% fig2 = figure(2);
-% 
-% C = datastruct.Mstep{end}.C;
-% 
-% save('Figure4/Final_plots/Panel_B','hall','C')
+for i1 = 1:length(neurons_to_show)
+  plot(fr_mean_pred_NSFR(neurons_to_show(i1),:)'*20+(i1-1)*const_fr_step,'Color', NSFR_COLOR);
+  scatter(params.ind_test, fr_mean_pred_NSFR(neurons_to_show(i1),params.ind_test)'*20+(i1-1)*const_fr_step, 100,  NSFR_COLOR, 'x', 'LineWidth',2);
+end
+ 
 
-% Make the figure;
-load('Figure4/Final_plots/Panel_B');
+for i1 = 1:length(neurons_to_show)
+  plot(fr_mean_pred_PLDS(neurons_to_show(i1),:)'*20+(i1-1)*const_fr_step,'Color',PLDS_COLOR);
+  scatter(params.ind_test, fr_mean_pred_PLDS(neurons_to_show(i1),params.ind_test)'*20+(i1-1)*const_fr_step, 100,  PLDS_COLOR, 'x', 'LineWidth',2);
+end
 
-fig2 = figure(2);
-plot(1:100, hall); % Quite meaningless honestly, see other options below
-ylabel('Latent modulation');
-
-% plot(1:100, exp(C*hall)*20); % AFter projecting through C matrix and exponentiating (individual neurons), *20 due to 50 ms bins to get Hz
-% ylabel('Firing rate modulation (Hz)');
-
-% plot(1:100, (C*hall) + log(20)) % AFter projecting through C matrix, but before exponentiating (individual neurons)
-% ylabel('Log firing rate modulation (log Hz)');
-
+set(gca,'XTick',0:25:100);
+ylim([0,const_fr_step*length(neurons_to_show)]);
+set(gca,'YTick',0:round(const_fr_step/2):(const_fr_step*length(neurons_to_show)-1));
+set(gca,'YTickLabel',repmat(0:round(const_fr_step/2):(const_fr_step-1),1,length(neurons_to_show)));
 xlabel('Trial')
+ylabel('Mean firing rate (Hz)');
+
 set(fig2,'Units','centimeters');
-set(fig2,'Position',[1,1,20,10]);
-print('-depsc2', 'Figure4/Final_plots/Panel_B.eps');
+set(fig2,'Position',[1,1,11,14]);
+
+set(fig2,'PaperPositionMode','auto')
+% print(fig2, '-depsc2', 'Figure4/Final_plots/Panel_A2.eps');
+export_fig('Figure4/Final_plots/Panel_A2.eps', '-native');
+
+%% Panel B - Error values
+load('Figure4/Final_plots/Panel_B.mat')
+fig5 = figure(5); 
+errorbar((1:8)-.05, mean(NSFR_error,2)/640*20, std(NSFR_error,0,2)/640*20, 'rx'); %/640 due to 10 left out trials and 64 neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
+hold on; errorbar((1:8)+.05, mean(PLDS_error,2)/640*20, std(PLDS_error,0,2)/640*20, 'bx');
+ylim([0.04 0.09])
+xlabel('k')
+set(gca,'XTick',1:8);
+ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
+legend('N-PLDS','PLDS')
+set(gca,'YTick', 0.04:.01:0.09);
+set(fig5,'Units','centimeters');
+set(fig5,'Position',[1,1,25,13]);
+
+set(fig5,'PaperPositionMode','auto')
+% print(fig5, '-depsc2', 'Figure4/Final_plots/Panel_Btop.eps');
+export_fig('Figure4/Final_plots/Panel_Btop.eps', '-native');
+
+%Most non-stationary 5 neurons
+neurons_to_include = neuron_stationarity_sort(1:5); %1 - most nonstationary, end - most stationary
+NSFR_error = mean(NSFR_error_each(:,:,neurons_to_include),3);
+PLDS_error = mean(PLDS_error_each(:,:,neurons_to_include),3);
+
+fig6 = figure(6); 
+errorbar((1:8)-.05, mean(NSFR_error,2)/(10*length(neurons_to_include))*20, std(NSFR_error,0,2)/(10*length(neurons_to_include))*20, 'rx'); %/(10*length(neurons_to_include)) due to 10 left out trials and certain number of chosen neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
+hold on; errorbar((1:8)+.05, mean(PLDS_error,2)/(10*length(neurons_to_include))*20, std(PLDS_error,0,2)/(10*length(neurons_to_include))*20, 'bx');
+xlabel('k')
+set(gca,'XTick',1:8);
+ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
+legend('N-PLDS','PLDS')
+set(fig6,'Units','centimeters');
+set(fig6,'Position',[1,1,11,8]);
+
+set(fig6,'PaperPositionMode','auto')
+% print(fig6, '-depsc2', 'Figure4/Final_plots/Panel_Bbot1.eps');
+export_fig('Figure4/Final_plots/Panel_Bbot1.eps', '-native');
+
+%Most stationary 5 neurons
+neurons_to_include = neuron_stationarity_sort(end-4:end); %1 - most nonstationary, end - most stationary
+NSFR_error = mean(NSFR_error_each(:,:,neurons_to_include),3);
+PLDS_error = mean(PLDS_error_each(:,:,neurons_to_include),3);
+
+fig7 = figure(7); 
+errorbar((1:8)-.05, mean(NSFR_error,2)/(10*length(neurons_to_include))*20, std(NSFR_error,0,2)/(10*length(neurons_to_include))*20, 'rx'); %/(10*length(neurons_to_include)) due to 10 left out trials and certain number of chosen neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
+hold on; errorbar((1:8)+.05, mean(PLDS_error,2)/(10*length(neurons_to_include))*20, std(PLDS_error,0,2)/(10*length(neurons_to_include))*20, 'bx');
+xlabel('k')
+set(gca,'XTick',1:8);
+ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
+legend('N-PLDS','PLDS')
+set(fig7,'Units','centimeters');
+set(fig7,'Position',[1,1,11,8]);
+set(fig7,'PaperPositionMode','auto')
+% print(fig7, '-depsc2', 'Figure4/Final_plots/Panel_Bbot2.eps');
+export_fig('Figure4/Final_plots/Panel_Bbot2.eps', '-native', fig7);
 
 %% Panel C - Tau histogram
 load('Figure4/Final_plots/Panel_C','tau2_end'); % k x runs tau^2 after last iteration
@@ -117,17 +146,19 @@ fig3 = figure(3);
 tau2_end = tau2_end(:);
 hist(sqrt(tau2_end),0:1:20); %Create histogram
 xlim([0,20])
-ylim([0,30]);
+ylim([0,25]);
 hold on;
 mean_tau = mean(sqrt(tau2_end));
-line([mean_tau mean_tau], [0,25],'Color','r'); %Add line to the mean
+line([mean_tau mean_tau], [0,22],'Color','r','LineWidth',3); %Add line to the mean
 
-xlabel('tau (trials)');
+xlabel('\tau (trials)');
 ylabel('Counts');
-title('Tau is conserved over different latent dimensionalities and training sets');
+% title('Tau is conserved over different latent dimensionalities and training sets');
 set(fig3,'Units','centimeters');
-set(fig3,'Position',[1,1,20,10]);
-print('-depsc2', 'Figure4/Final_plots/Panel_C.eps');
+set(fig3,'Position',[1,1,11,10]);
+set(fig3,'PaperPositionMode','auto')
+%print(fig3, '-depsc2', 'Figure4/Final_plots/Panel_C.eps');
+export_fig('Figure4/Final_plots/Panel_C.eps', '-native', fig3);
 
 %% Panel D - Total Covariance
 load('Figure4/Final_plots/Panel_D');
@@ -156,63 +187,12 @@ plot(-500:50:500,to_plot(3,:),'Color',PLDS_COLOR)
 % plot(-500:50:500,to_plot(5,:),'Color',NSFR_COLOR,'LineStyle','--')
 % plot(-500:50:500,to_plot(6,:),'Color',PLDS_COLOR,'LineStyle','--')
 
-legend({'Data','N-PLDS (k==7)','PLDS (k==7)'})
-xlabel('Time lag (ms)')
-ylabel('Normalized autocovariance')
+h_d_leg = legend({'Data','N-PLDS (k=7)','PLDS (k=7)'});
+h_d_xlab = xlabel('Time lag (ms)');
+h_d_ylab = ylabel('Mean autocovariance (a.u.)');
+set(h_d_leg, 'FontSize', 10)
 set(fig4,'Units','centimeters');
-set(fig4,'Position',[1,1,15,10]);
-print('-depsc2', 'Figure4/Final_plots/Panel_D.eps');
-
-%% Panel E - Error values
-load('Figure4/Final_plots/Panel_E.mat')
-fig5 = figure(5); 
-errorbar((1:9)-.05, mean(NSFR_error,2)/640*20, std(NSFR_error,0,2)/640*20, 'rx'); %/640 due to 10 left out trials and 64 neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
-hold on; errorbar((1:9)+.05, mean(PLDS_error,2)/640*20, std(PLDS_error,0,2)/640*20, 'bx');
-ylim([0.002 0.005]*20)
-xlabel('k')
-title('RMSE in firing rates on left out trials (10%) after 30 iter')
-set(gca,'XTick',1:9);
-ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
-legend('N-PLDS','PLDS')
-set(fig5,'Units','centimeters');
-set(fig5,'Position',[1,1,20,10]);
-print('-depsc2', 'Figure4/Final_plots/Panel_E.eps');
-
-%% Panel F - Error values on just certain neurons, based on non-stationarity
-load('Figure4/Final_plots/Panel_F','NSFR_error_each', 'PLDS_error_each','neuron_stationarity_sort')
-
-%Most non-stationary 5 neurons
-neurons_to_include = neuron_stationarity_sort(1:5); %1 - most nonstationary, end - most stationary
-NSFR_error = mean(NSFR_error_each(:,:,neurons_to_include),3);
-PLDS_error = mean(PLDS_error_each(:,:,neurons_to_include),3);
-
-fig6 = figure(6); 
-errorbar((1:9)-.05, mean(NSFR_error,2)/(10*length(neurons_to_include))*20, std(NSFR_error,0,2)/(10*length(neurons_to_include))*20, 'rx'); %/(10*length(neurons_to_include)) due to 10 left out trials and certain number of chosen neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
-hold on; errorbar((1:9)+.05, mean(PLDS_error,2)/(10*length(neurons_to_include))*20, std(PLDS_error,0,2)/(10*length(neurons_to_include))*20, 'bx');
-xlabel('k')
-title('RMSE in firing rates of most non-stationary 5 neurons')
-set(gca,'XTick',1:9);
-ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
-legend('N-PLDS','PLDS')
-set(fig6,'Units','centimeters');
-set(fig6,'Position',[1,1,20,10]);
-print('-depsc2', 'Figure4/Final_plots/Panel_F.eps');
-
-%Most stationary 5 neurons
-neurons_to_include = neuron_stationarity_sort(end-4:end); %1 - most nonstationary, end - most stationary
-NSFR_error = mean(NSFR_error_each(:,:,neurons_to_include),3);
-PLDS_error = mean(PLDS_error_each(:,:,neurons_to_include),3);
-
-fig7 = figure(7); 
-errorbar((1:9)-.05, mean(NSFR_error,2)/(10*length(neurons_to_include))*20, std(NSFR_error,0,2)/(10*length(neurons_to_include))*20, 'rx'); %/(10*length(neurons_to_include)) due to 10 left out trials and certain number of chosen neurons/trials to get error / single bin, *20 to get back to Hz from 50 ms bins.
-hold on; errorbar((1:9)+.05, mean(PLDS_error,2)/(10*length(neurons_to_include))*20, std(PLDS_error,0,2)/(10*length(neurons_to_include))*20, 'bx');
-xlabel('k')
-title('RMSE in firing rates of most stationary 5 neurons')
-set(gca,'XTick',1:9);
-ylabel('RMSE'); %Population mean firing rate 4.5412 over everything;
-legend('N-PLDS','PLDS')
-set(fig7,'Units','centimeters');
-set(fig7,'Position',[1,1,20,10]);
-print('-depsc2', 'Figure4/Final_plots/Panel_F2.eps');
-
-
+set(fig4,'Position',[1,1,11,10]);
+set(fig4,'PaperPositionMode','auto')
+% print(fig4, '-depsc2', 'Figure4/Final_plots/Panel_D.eps');
+export_fig('Figure4/Final_plots/Panel_D.eps', '-native');
