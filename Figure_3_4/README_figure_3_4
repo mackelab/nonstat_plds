@@ -1,0 +1,10 @@
+The code is somewhat patchy, the main fitting function is Figure4/runAlexsdata_prediction_func.m, which when called will read the data, initialize parameters and fits the chosen model via the function testcode_nonstationaryPLDS_varyingmeanfiringrate_prediction/VBEM_PLDSnonstationary.m
+
+The important fitting parameters are scattered through different functions, I marked them in the code with comments "%FITPARAM", a search in the folder should reveal all of them.
+
+The outputs are going to be saved in the specified folders within a subfolder specifying the dimensionality and the run number. Firstly the initialization parameters are stored in init_data.mat, the updates of each iteration are in datastruct_MODELNAME_iter_n.mat, then the final fit are in final_MODELNAME_data.mat
+
+Part of the analysis is evaluating the predictive performance on left-out trials. This is conducted by Figure4/analyze_predictions.m script, predicting parameters on left-out trials, then simulating a number of examples (set by nsamps within make_predictions.m) based on those params. We get the value of the error by comparing the mean (or mode) of the simulations to the real data. The error values will be stored for each dimensionality and run in matrix variables NSFR_error and PLDS_error.
+
+
+For the illustration purposes, further analysis was performed mostly on the run with the best predictive performance in the dataset, which was used to create Figure 4/B,C.
