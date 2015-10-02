@@ -41,7 +41,7 @@ end
 
 if strcmp(Model, 'NSFR') || strcmp(Model, 'PLDS')
     % there is no prior on C
-    C = randn(p,k);
+    C = 0.2*randn(p,k);
     params.C = C;
     
 else

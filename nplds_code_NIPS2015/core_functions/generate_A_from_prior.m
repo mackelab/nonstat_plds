@@ -3,7 +3,7 @@ function A = generate_A_from_prior(hyperparams, k, r, Model)
 %%
 if strcmp(Model, 'NSFR') || strcmp(Model, 'PLDS')
     
-    A = rand(k);
+    A = 0.1*rand(k);
     A = A/max(abs(eigs(A)))*hyperparams.Anrm;
     
 else
