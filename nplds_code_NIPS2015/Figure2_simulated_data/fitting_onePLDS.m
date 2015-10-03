@@ -1,5 +1,5 @@
 %% to fit one PLDS
-% mijung  edited on Oct 3, 2016
+% mijung  edited on Oct 3, 2015
 
 clear all;
 close all;

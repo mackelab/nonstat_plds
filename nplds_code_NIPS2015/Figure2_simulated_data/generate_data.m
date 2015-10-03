@@ -1,6 +1,6 @@
 %% generate data for Figure 2
 % mijung wrote on April 22, 2014
-% edited on Oct 3, 2016
+% edited on Oct 3, 2015
 
 
 clear all;
