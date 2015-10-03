@@ -1,7 +1,6 @@
 %% a demo to demonstrate how to use code for PLDS with nonstationary firing rates
 
-% Oct 2, 2015
-% wrote by Mijung 
+% mijung wrote on Oct 2, 2015
 
 clear all;
 close all;
@@ -110,10 +109,7 @@ for rr = 1: r
         
     %% figure
     figure;
-    
     subplot(2,2,[1 2]); plot([meanvec(:,rr) meanvec_est(:,rr)]); legend('mean of Z using true params', 'mean of Z using estimated params'); xlabel('neurons');
-%     set(gca,'ylim', [params.d(1)-0.2, params.d(1)+0.2]);
-    
     subplot(2,2,3); hinton(covmat(:,:,rr),['cov z' num2str(max(max(covmat(:,:,rr))),'%.4f')],'standard');
     subplot(2,2,4); hinton(covmat_est(:,:,rr),['cov z est  ' num2str(max(max(covmat_est(:,:,rr))),'%.4f')],'standard');
         
