@@ -4,10 +4,11 @@ clear all;
 close all;
 clc;
 
-% add path to use 'hinton' figure to show estimates
-addpath ../mattBealsCode_v3_4_1/
-addpath ../standardEM/
-addpath ../testcode_nonstationaryPLDS_A_multipleRecordings/
+seed = 1;
+oldRng = rng();
+rng(seed);
+
+addpath ../core_functions/
 
 %%
 % load data
@@ -27,26 +28,42 @@ params.V0 = V0;
 params.Q = eye(k);
 
 xyzinpn.inpn = repmat(inpn, [1 100]);
+
+yy = zeros(p, T*size(y,3));
+for i=1:size(y,3)
+    yy(:, 1+(i-1)*T:i*T) = y(:,:,i);
+end
+
 xyzinpn.y = yy;
-xyzinpn.z = zz; 
+% xyzinpn.z = zz; 
 params.inpn = xyzinpn.inpn;
+
+params.ind_train = 1:r; % all of them are used for training 
+params.tau_init = 10*rand; 
+params.m_h_init = zeros(k,1);
+params.sig_init = 10*abs(rand); 
 
 %% start fitting here
 
-% addpath ../testcode_nonstationaryPLDS_varyingmeanfiringrate/
-
 
 Model = 'NSFR';
+params.maxIter = 10; 
 datastruct = VBEM_PLDSnonstationary(xyzinpn, r, params, Model); 
 
+save fitting_onePLDS.mat
 % save Figure2_OneModel.mat
 
-%%
+%% Sanity check 
 
-load Figure2_OneModel.mat
+% load Figure2_OneModel.mat
 
-fromMstep = datastruct.Mstep{10};
-fromEstep = datastruct.Estep{10};
+fromMstep = datastruct.Mstep{end};
+fromEstep = datastruct.Estep{end};
+
+zz = zeros(p, T*size(y,3));
+for i=1:size(y,3)
+    zz(:, 1+(i-1)*T:i*T) = z(:,:,i);
+end
 
 xyzinpn.z = zz;
 
