@@ -1,6 +1,7 @@
 %% generate data for Figure 2
-% April 22, 2014
-% wrote by Mijung Park
+% mijung wrote on April 22, 2014
+% edited on Oct 3, 2016
+
 
 clear all;
 close all;
@@ -87,7 +88,7 @@ for i=1:r
     z(:,:,i) = xyzinpn{i}.z;
 end
 
-save all_NSFR.mat;
+save mat_files/all_NSFR.mat;
 
 %% visualise log mean firing rate of generated data (Figure2: A and B)
 

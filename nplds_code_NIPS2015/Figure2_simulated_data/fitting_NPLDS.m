@@ -1,4 +1,5 @@
-%% to fit the data for Figure 2
+%% to fit NPLDS
+% mijung  edited on Oct 3, 2016
 
 clear all;
 close all;
@@ -13,7 +14,7 @@ addpath ../core_functions/
 
 %%
 % load data
-load all_NSFR.mat
+load mat_files/all_NSFR.mat
 
 r = 100;
 
@@ -47,12 +48,21 @@ Model = 'NSFR';
 params.maxIter = 10; 
 datastruct = VBEM_PLDSnonstationary(xyzinpn, r, params, Model); 
 
-save fitting_NPLDS.mat
+save mat_files/fitting_NPLDS.mat
 
-%% sanity check
+%% visualising results
+
+load mat_files/fitting_NPLDS.mat
 
 datastruct.Mstep = datastruct.Mstep{end};
 datastruct.Estep = datastruct.Estep{end};
+
+% (1) log mean firing rates
+
+zz = zeros(p, T*size(y,3));
+for i=1:size(y,3)
+    zz(:, 1+(i-1)*T:i*T) = z(:,:,i);
+end
 
 z1_est = zeros(r, T);
 z2_est = zeros(r, T);
@@ -62,6 +72,8 @@ z2 = zeros(r, T);
 
 corr_z_est = zeros(r,1);
 corr_z = zeros(r, 1);
+
+zestmat = zeros(p, T, r);
 
 for trial_to_check = 1:r
     
@@ -78,6 +90,8 @@ for trial_to_check = 1:r
     z1_est(trial_to_check,:) = sum(Cmud(1:p/2,:));
     z2_est(trial_to_check,:) = sum(Cmud(p/2+1:p,:));
     
+    zestmat(:,:,trial_to_check) = Cmud;
+     
     corr_z_est(trial_to_check) = corr(z1_est(trial_to_check,:)', z2_est(trial_to_check,:)');
     
     invsig = datastruct.Estep{trial_to_check}.inv_sigmarg;
@@ -88,18 +102,75 @@ for trial_to_check = 1:r
         errorbar(:,t) =  diag(covz_errbar(:,:,t));
     end
     
-    
-    % plot(1:T, k1k2mat(2,:,1)', 'k', 1:T, k1k2mat_est(2,:,1), 'r', 1:T, k1k2mat_est(2,:,1)-1.64*sqrt(sum(errorbar(1+p/2:p,:))), 'r--', 1:T, k1k2mat_est(2,:,1)+1.64*sqrt(sum(errorbar(1+p/2:p,:))), 'r--');
-    % set(gca, 'ylim', [-45 -35])
-    
     z1(trial_to_check,:) = sum(xyzinpn{trial_to_check}.z(1:p/2,:,1));
     z2(trial_to_check,:) = sum(xyzinpn{trial_to_check}.z(p/2+1:p,:,1));
     
     corr_z(trial_to_check) = corr(z1(trial_to_check,:)', z2(trial_to_check,:)'); 
 
+end
+
+figure
+subplot(211);
+plot(1:r, mean(z1,2)/(p/2),'r', 1:r, mean(z2,2)/(p/2), 'b', ...
+    1:r, mean(z1_est,2)/(p/2), 'r--', 1:r, mean(z2_est,2)/(p/2), 'b--')
+set(gca, 'ylim', [-3.0 -0.5]); legend('true z (grp1)', 'estimated z(grp1)', 'true z (grp2)', 'estimated z(grp2)');
+
+% (2) covariances 
+
+numtimebins = T;
+autocorr = zeros(p, numtimebins+1);
+
+for whichcell = 1:p
+    autocorr(whichcell, :) = xcov(zz(whichcell,:), numtimebins/2, 'unbiased');
+end
+
+avgautocorr_acrcells = mean(autocorr);
+
+autocorr_condi = zeros(p, numtimebins+1, r);
+
+for whichcell = 1:p
+    
+    for whichtrial = 1:r
+        autocorr_condi(whichcell, :, whichtrial) = xcov(z(whichcell,:,whichtrial), numtimebins/2, 'unbiased');
+    end
     
 end
 
-subplot(311); plot(1:r, corr_z, 'o-', 1:r, corr_z_est, 'o-'); set(gca, 'ylim', [0 1]);
-subplot(312); plot(1:T, sum(z1), 'k', 1:T, sum(z1_est), 'r')
-subplot(313); plot(1:T, sum(z2), 'k', 1:T, sum(z2_est), 'r')
+autocorr_per_eachtrial = squeeze(mean(autocorr_condi));
+avgautocorr_condi = mean(autocorr_per_eachtrial,2);
+
+figure
+subplot(211); 
+plot(1:numtimebins+1, avgautocorr_acrcells/max(avgautocorr_acrcells), 'k', 1:numtimebins+1, avgautocorr_condi/max(avgautocorr_condi), 'r')
+legend('total covariance', 'conditional covariance');
+
+zzz = [];
+for i=1:r
+    zzz = [zz zestmat(:,:,i)];
+end
+
+autocorr = zeros(p, numtimebins+1);
+
+for whichcell = 1:p
+    autocorr(whichcell, :) = xcov(zzz(whichcell,:), numtimebins/2, 'unbiased');
+end
+
+avgautocorr_acrcells = mean(autocorr);
+
+autocorr_condi = zeros(p, numtimebins+1, r);
+
+for whichcell = 1:p
+    
+    for whichtrial = 1:r
+        autocorr_condi(whichcell, :, whichtrial) = xcov(zestmat(whichcell,:,whichtrial), numtimebins/2, 'unbiased');
+    end
+    
+end
+
+autocorr_per_eachtrial = squeeze(mean(autocorr_condi));
+avgautocorr_condi = mean(autocorr_per_eachtrial,2);
+
+subplot(212);
+plot(1:numtimebins+1, avgautocorr_acrcells/max(avgautocorr_acrcells), 'k--', 1:numtimebins+1, avgautocorr_condi/max(avgautocorr_condi), 'r--')
+legend('estimate of total covariance', 'estimate of conditional covariance');
+

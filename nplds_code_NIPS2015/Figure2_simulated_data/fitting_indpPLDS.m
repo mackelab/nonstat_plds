@@ -1,4 +1,5 @@
 % fitting independent PLDS
+% mijung  edited on Oct 3, 2016
 
 clear all;
 close all;
@@ -12,7 +13,7 @@ rng(seed);
 addpath ../core_functions/
 
 %%
-load all_NSFR.mat
+load mat_files/all_NSFR.mat
 
 
 params = cell(r,1);
@@ -51,11 +52,11 @@ for i = 1:r
     datastruct{i} = VBEM_PLDSnonstationary(xyzinpn{i}, 1, params{i}, Model);
 end
 
-save fitting_indpPLDS.mat
+save mat_files/fitting_indpPLDS.mat
 
 %% visualising the results 
 
-load fitting_indpPLDS.mat
+load mat_files/fitting_indpPLDS.mat
 
 % (1) log firing rate
 
@@ -115,7 +116,7 @@ plot(1:r, mean(z1,2)/(p/2),'r', 1:r, mean(z2,2)/(p/2), 'b', ...
     1:r, mean(z1_est,2)/(p/2), 'r--', 1:r, mean(z2_est,2)/(p/2), 'b--')
 set(gca, 'ylim', [-3.0 -0.5]); legend('true z (grp1)', 'estimated z(grp1)', 'true z (grp2)', 'estimated z(grp2)');
 
-% (2) covariance 
+% (2) covariances 
 
 numtimebins = T;
 autocorr = zeros(p, numtimebins+1);
