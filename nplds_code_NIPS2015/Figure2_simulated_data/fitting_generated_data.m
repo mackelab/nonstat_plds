@@ -4,7 +4,11 @@ clear all;
 close all;
 clc;
 
-addpath ../standardEM/
+seed = 1;
+oldRng = rng();
+rng(seed);
+
+
 addpath ../core_functions/
 
 %%
@@ -32,14 +36,23 @@ end
 
 xyzinpn = newdataset;
 
+params.ind_train = 1:r; % all of them are used for training 
+params.tau_init = 10*rand; 
+params.m_h_init = zeros(k,1);
+params.sig_init = 10*abs(rand); 
+
 %% start fitting here
 
 Model = 'NSFR';
+params.maxIter = 10; 
 datastruct = VBEM_PLDSnonstationary(xyzinpn, r, params, Model); 
 
 save fitting_NPLDS.mat
 
 %% sanity check
+
+datastruct.Mstep = datastruct.Mstep{end};
+datastruct.Estep = datastruct.Estep{end};
 
 z1_est = zeros(r, T);
 z2_est = zeros(r, T);
@@ -90,8 +103,3 @@ end
 subplot(311); plot(1:r, corr_z, 'o-', 1:r, corr_z_est, 'o-'); set(gca, 'ylim', [0 1]);
 subplot(312); plot(1:T, sum(z1), 'k', 1:T, sum(z1_est), 'r')
 subplot(313); plot(1:T, sum(z2), 'k', 1:T, sum(z2_est), 'r')
-
-%%
-
-
-
