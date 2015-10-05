@@ -31,8 +31,8 @@ end
 %% VBEM (for now r==1)
 
 nIter = 0;
-if isempty(params.maxIter)
-    maxIter = 3; %FITPARAM Iteration number
+if isfield(params, 'maxIter')
+    maxIter = 3;
 else
     maxIter = params.maxIter;
 end
