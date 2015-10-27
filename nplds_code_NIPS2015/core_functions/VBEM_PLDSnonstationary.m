@@ -31,7 +31,7 @@ end
 %% VBEM (for now r==1)
 
 nIter = 0;
-if isfield(params, 'maxIter')
+if ~isfield(params, 'maxIter')
     maxIter = 3;
 else
     maxIter = params.maxIter;

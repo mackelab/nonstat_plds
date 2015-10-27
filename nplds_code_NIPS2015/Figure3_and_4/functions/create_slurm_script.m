@@ -3,7 +3,7 @@ function script_file_path = create_slurm_script( data_file, output_folder, code_
 %   Detailed explanation goes here
 
 matlab_cmd = ['/bin/matlab -nodesktop -nosplash -singleCompThread -logfile ' output_folder filesep 'logfile.txt'];
-func_call = [' -r "cd Figure4;' 'runAlexsdata_prediction_func ' data_file ' ' output_folder ' ' code_dir ' ' num2str(k) ' ' Model '; exit;" '];
+func_call = [' -r "cd Figure3_and_4/functions; runAlexsdata_prediction_func ' data_file ' ' output_folder ' ' code_dir ' ' num2str(k) ' ' Model '; exit;" '];
 
 script_file_path = [output_folder filesep 'k' num2str(k) '_run' output_folder(end)];
 

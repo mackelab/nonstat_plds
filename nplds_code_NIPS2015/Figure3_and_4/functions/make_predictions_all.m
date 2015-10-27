@@ -1,6 +1,8 @@
 function fr_pred_error = make_predictions_all( orig_data_file, saved_data_file, saved_params_file, code_dir, k, Model, redo)
-%MAKE_PREDICTIONS Same as make_predictions, just saves more intermediate
-%files
+%MAKE_PREDICTIONS Simulates data not only for left-out trials but also for
+%trials we fitted over, purely for visualization purposes, this is not used to
+%assess performance
+
 
 if nargin < 7
   redo = 0;
@@ -25,8 +27,9 @@ load(saved_data_file, 'datastruct')
 load(saved_params_file, 'params')
 
 cd(code_dir);
-addpath([code_dir filesep 'standardEM/']);
-addpath([code_dir filesep 'testcode_nonstationaryPLDS_varyingmeanfiringrate_prediction/'])
+addpath core_functions
+addpath gpml-matlab/gpml
+addpath Figure3_and_4/functions
 
 
 %% predict h for held-out datasets
@@ -89,13 +92,4 @@ Mstepresults = datastruct.Mstep{end};
 save([saved_data_file(1:end-4) '_predfr_all.mat'], 'fr_pred_error', 'fr_mean_pred_all', 'fr_mean_true', 'Mstepresults', 'hpred', 'hall','params', 'all_data','-v7.3');
 
 end
-
-
-
-
-
-
-
-
-
 

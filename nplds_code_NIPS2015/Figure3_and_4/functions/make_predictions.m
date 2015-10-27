@@ -9,7 +9,7 @@ end
 
 
 
-%Check if it was already done
+%Check if it was already done, unless redo==1
 if exist([saved_data_file(1:end-4) '_predfr.mat'],'file') && redo==0
   load([saved_data_file(1:end-4) '_predfr.mat'], 'fr_pred_error');
   return;
@@ -26,8 +26,9 @@ load(saved_data_file, 'datastruct')
 load(saved_params_file, 'params')
 
 cd(code_dir);
-addpath([code_dir filesep 'standardEM/']);
-addpath([code_dir filesep 'testcode_nonstationaryPLDS_varyingmeanfiringrate_prediction/'])
+addpath core_functions
+addpath gpml-matlab/gpml
+addpath Figure3_and_4/functions
 
 % 
 %% predict h for held-out datasets

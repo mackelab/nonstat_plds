@@ -5,23 +5,23 @@ function output = runAlexsdata_prediction_func(data_file, output_folder, code_di
 
 cd(code_dir)
 
-%Check if we got k as a string input instead of numeric, and convert
+%Check if we got k as a string input instead of numeric, and convert (for
+%certain cluster architectures)
 if ~isa(k, 'numeric')
     k = str2num(k);
 end
 
-[status, seed] = system('od /dev/urandom --read-bytes=4 -tu | awk ''{print $2}''');
+%Reset random seed
+[status, seed] = system('od /dev/urandom --read-bytes=4 -tu | awk ''{print $2}'''); 
 seed=str2double(seed);
 rng(seed);
 
-addpath Figure4/
-addpath Figure4/Analyze/
-addpath standardEM/
-addpath testcode_nonstationaryPLDS_varyingmeanfiringrate_prediction/
+addpath core_functions
 addpath gpml-matlab/gpml
+addpath Figure3_and_4/functions
 
 %Check if we already did the initialization
-if exist([output_folder filesep 'init_data.mat'], 'file') % Check if already initialized, then load that
+if exist([output_folder filesep 'init_data.mat'], 'file')
   load([output_folder filesep 'init_data.mat'], 'newdataset', 'params', 'k');
   rtrain = length(params.ind_train);
   fprintf('Initialization has already been done.\n');
@@ -42,7 +42,9 @@ else
 
   %% Initialize parameters
 
-  params.A = 0.9*eye(k); %FITPARAM Inialially contractive dynamics matrix
+  params.maxIter = 30; %FITPARAM Maximum number of VBEM iterations
+  
+  params.A = 0.9*eye(k); %FITPARAM Inialially contractive dynamics matrix (0.9)
   params.C = randn(size(resps,1),k); %neuron num by latent dim
   params.B = randn(k,size(stims,1)); %latent dim by input dim
   params.inpn = stims; 
@@ -71,21 +73,8 @@ else
   tmp = reshape(params.yy,size(params.yy,1),length(params.ind_train),[]);
   tmp = mean(tmp,3);
   params.sig_init = 1.5*max(max(tmp,[],2) -min(tmp,[],2)); %FITPARAM Initial noise parameter in the kernel. 1.5 * maximum change in firing rate of a neuron over observed period
-  params.m_h_init = zeros(k,1);
+  params.m_h_init = zeros(k,1); % Initialize the expected mean of the latent h
 
-  save([output_folder filesep 'init_data.mat'], 'newdataset', 'params', 'k', 'Model');
-end
-
-%Additional sigma initialization
-if ~isfield(params, 'sig_init')
-  tmp = reshape(params.yy,size(params.yy,1),length(params.ind_train),[]);
-  tmp = mean(tmp,3);
-  params.sig_init = 1.5*max(max(tmp,[],2) -min(tmp,[],2)); %FITPARAM Initial noise parameter in the kernel. 1.5 * maximum change in firing rate of a neuron over observed period
-  save([output_folder filesep 'init_data.mat'], 'newdataset', 'params', 'k', 'Model');
-end
-
-if ~isfield(params, 'm_h_init')
-  params.m_h_init = zeros(k,1);
   save([output_folder filesep 'init_data.mat'], 'newdataset', 'params', 'k', 'Model');
 end
 
