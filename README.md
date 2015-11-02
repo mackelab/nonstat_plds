@@ -13,3 +13,5 @@ Part of the analysis is evaluating the predictive performance on left-out trials
 For the illustration purposes, further analysis was performed mostly on the run with the best predictive performance in the dataset, which was used to create Figure 4/B,C.
 
 The figures of the paper, barring visualization changes, can be reproduced exactly via running the create_figure3_and_4_final.m script file.
+
+The code uses the GP-toolbox GPML version 3.6 by Carl Rasmussen and Chris Williams, http://www.gaussianprocess.org/gpml/code/matlab/doc/. 
