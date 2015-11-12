@@ -1,4 +1,4 @@
-The core functions for running the VBEM algorithm over the class of models specified in the article are within the core_functions folder. We also use a toolbox for initializing the time scale of the GP kernel, that is in the folder gpml_matlab.
+The core functions for running the Bayesian Laplace propagation algorithm over the class of models specified in the article are within the core_functions folder. We also use a toolbox for initializing the time scale of the GP kernel, that is in the folder gpml_matlab.
 
 Within the Figure2_simulated_data, one can find functions to generate simulated data, then fit 3 different candidate models to it.
 
